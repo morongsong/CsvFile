@@ -10,6 +10,9 @@ TEST(CsvFile,abc)
         oCsvFile.SetDouble(2,2,3.3);
         oCsvFile.SetString(3,3,"3.ff3");
         oCsvFile.SetString(4, 4, ",,,\n,,");
+        oCsvFile.SetString(5, 6, ",");
+        oCsvFile.SetString(5, 7, ",,");
+        oCsvFile.SetString(5, 8, ",,,");
         oCsvFile.Save("hello.csv");
     }
 
@@ -21,6 +24,9 @@ TEST(CsvFile,abc)
         EXPECT_DOUBLE_EQ(3.3,oCsvFile.GetDouble(2,2));
         EXPECT_STREQ("3.ff3", oCsvFile.GetString(3,3));
         EXPECT_STREQ(",,,\n,,", oCsvFile.GetString(4, 4));
+        EXPECT_STREQ(",", oCsvFile.GetString(5, 6));
+        EXPECT_STREQ(",,", oCsvFile.GetString(5, 7));
+        EXPECT_STREQ(",,,", oCsvFile.GetString(5, 8));
     }
 
     return;

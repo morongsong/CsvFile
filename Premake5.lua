@@ -15,6 +15,6 @@ project (TheTargetName)
 
     files {"*.h","*.cpp","*.lua"}
 
-    pchheader "stdafx.h"
-    pchsource "stdafx.cpp"
+    --pchheader "stdafx.h"
+    --pchsource "stdafx.cpp"
 

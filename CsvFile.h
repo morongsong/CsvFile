@@ -8,14 +8,15 @@
 #define __CsvFile_H_08C5C33E_39F3_4ED8_B3F4_0FFD010D110A__
 #pragma once
 
+#include <string>
+#include <map>
 
 /// CsvFile
 class CsvFile
 {
 public:
-    class CMapIDStr;
-    typedef int IROW;
-    typedef int ICOL;
+    typedef int INUM;//123
+    typedef int IABC;//ABC 
 public:
     CsvFile();
     ~CsvFile();
@@ -23,20 +24,21 @@ public:
     bool Load(const char* pszFile);
     bool Save(const char* pszFile = NULL);
 public:
-    bool SetString(IROW nRow, ICOL nCol, const char* pszVal);
-    bool SetInt(IROW nRow, ICOL nCol, int nVal);
-    bool SetDouble(IROW nRow, ICOL nCol, double dVal);
+    bool SetString(INUM nRow, IABC nCol, const char* pszVal);
+    bool SetInt(INUM nRow, IABC nCol, int nVal);
+    bool SetDouble(INUM nRow, IABC nCol, double dVal);
 public:
-    const char* GetString(IROW nRow, ICOL nCol, const char* pszDefVal="");
-    int GetInt(IROW nRow, ICOL nCol,int nDef = 0);
-    double GetDouble(IROW nRow, ICOL nCol,double dDev = 0);
+    const char* GetString(INUM nRow, IABC nCol, const char* pszDefVal="");
+    int GetInt(INUM nRow, IABC nCol,int nDef = 0);
+    double GetDouble(INUM nRow, IABC nCol,double dDev = 0);
 public:
-    bool HaveData(IROW nRow, ICOL nCol);
+    bool HaveData(INUM nRow, IABC nCol);
     int GetMaxRow() { return m_nMaxRow; }
     int GetMaxCol() { return m_nMaxCol; }
 private:
-    char m_szFile[MAX_PATH];
-    CMapIDStr* m_pData;
+    char m_szFile[1024];
+	typedef std::map<unsigned int, std::string> CMapIDStr;
+    CMapIDStr m_pData;
     int m_nMaxRow;
     int m_nMaxCol;
 };

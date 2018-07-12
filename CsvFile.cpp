@@ -65,25 +65,20 @@ static string EncodeSpec(LPCSTR pszText)
     return strResult;
 }
 
-class CsvFile::CMapIDStr : public std::map<unsigned int, std::string>
-{
-
-};
 
 CsvFile::CsvFile()
 {
     m_nMaxRow = 0;
     m_nMaxCol = 0;
-	m_pData = new CMapIDStr;
 	m_szFile[0] = 0;
 }
 
 CsvFile::~CsvFile()
 {
-	delete m_pData;
+	
 }
 
-bool CsvFile::Load(const char* pszFile)
+bool CsvFile::Load(const char*pszFile)
 {
 	if(!pszFile) {return false;}
     strcpy_s(m_szFile,pszFile);
@@ -115,7 +110,7 @@ bool CsvFile::Load(const char* pszFile)
 
     m_nMaxRow = 0;
     m_nMaxCol = 0;
-    m_pData->clear();
+    m_pData.clear();
 
     struct SBlockCell
     {
@@ -139,7 +134,7 @@ bool CsvFile::Load(const char* pszFile)
         {
             *pCur = 0;
             unsigned int nId = ((oCurCell.nRow << 16) | oCurCell.nCol);
-            (*m_pData)[nId] = (oCurCell.bSqec ? DecodeSpec(oCurCell.pCurStart) : oCurCell.pCurStart);
+            m_pData[nId] = (oCurCell.bSqec ? DecodeSpec(oCurCell.pCurStart) : oCurCell.pCurStart);
             if (m_nMaxRow < oCurCell.nRow) { m_nMaxRow = oCurCell.nRow; }
             if (m_nMaxCol < oCurCell.nCol) { m_nMaxCol = oCurCell.nCol; }
             oCurCell.bSqec = false;
@@ -150,7 +145,7 @@ bool CsvFile::Load(const char* pszFile)
         {
             *pCur = 0;
             unsigned int nId = ((oCurCell.nRow << 16) | oCurCell.nCol);
-            (*m_pData)[nId] = (oCurCell.bSqec ? DecodeSpec(oCurCell.pCurStart) : oCurCell.pCurStart);
+            m_pData[nId] = (oCurCell.bSqec ? DecodeSpec(oCurCell.pCurStart) : oCurCell.pCurStart);
             if (m_nMaxRow < oCurCell.nRow) { m_nMaxRow = oCurCell.nRow; }
             if (m_nMaxCol < oCurCell.nCol) { m_nMaxCol = oCurCell.nCol; }
             oCurCell.bSqec = false;
@@ -228,18 +223,18 @@ bool CsvFile::Save(const char* pszFile/* = nullptr*/)
     return true;
 }
 
-bool CsvFile::SetString(IROW nRow, ICOL nCol, const char* pszVal)
+bool CsvFile::SetString(INUM nRow, IABC nCol, const char* pszVal)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
     if (m_nMaxRow < nRow) { m_nMaxRow = nRow; }
     if (m_nMaxCol < nCol) { m_nMaxCol = nCol; }
     unsigned int nId = ((nRow << 16) | nCol);
-    (*m_pData)[nId] = pszVal;
+    m_pData[nId] = pszVal;
     return true;
 }
 
-bool CsvFile::SetInt(IROW nRow, ICOL nCol, int nVal)
+bool CsvFile::SetInt(INUM nRow, IABC nCol, int nVal)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
@@ -248,11 +243,11 @@ bool CsvFile::SetInt(IROW nRow, ICOL nCol, int nVal)
     char szBuf[64];
     sprintf_s(szBuf,"%d", nVal);
     unsigned int nId = ((nRow << 16) | nCol);
-    (*m_pData)[nId] = szBuf;
+    m_pData[nId] = szBuf;
     return true;
 }
 
-bool CsvFile::SetDouble(IROW nRow, ICOL nCol, double dVal)
+bool CsvFile::SetDouble(INUM nRow, IABC nCol, double dVal)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
@@ -261,25 +256,25 @@ bool CsvFile::SetDouble(IROW nRow, ICOL nCol, double dVal)
     char szBuf[64];
 	sprintf_s(szBuf, "%f", dVal);
     unsigned int nId = ((nRow << 16) | nCol);
-    (*m_pData)[nId] = szBuf;
+    m_pData[nId] = szBuf;
     return true;
 }
 
-bool CsvFile::HaveData(IROW nRow, ICOL nCol)
+bool CsvFile::HaveData(INUM nRow, IABC nCol)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
     unsigned int nId = ((nRow << 16) | nCol);
-    return m_pData->find(nId) != m_pData->end() ? true : false;
+    return m_pData.find(nId) != m_pData.end() ? true : false;
 }
 
-const char* CsvFile::GetString(IROW nRow, ICOL nCol, const char* pszDefVal/* = ""*/)
+const char* CsvFile::GetString(INUM nRow, IABC nCol, const char* pszDefVal/* = ""*/)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
     unsigned int nId = ((nRow << 16) | nCol);
-    CMapIDStr::iterator iter = m_pData->find(nId);
-    if (iter != m_pData->end())
+    CMapIDStr::iterator iter = m_pData.find(nId);
+    if (iter != m_pData.end())
     {
         std::string& key = iter->second;
         return key.c_str();
@@ -287,13 +282,13 @@ const char* CsvFile::GetString(IROW nRow, ICOL nCol, const char* pszDefVal/* = "
     return pszDefVal;
 }
 
-int CsvFile::GetInt(IROW nRow, ICOL nCol, int nDef/* = 0*/)
+int CsvFile::GetInt(INUM nRow, IABC nCol, int nDef/* = 0*/)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
     unsigned int nId = ((nRow << 16) | nCol);
-    CMapIDStr::iterator iter = m_pData->find(nId);
-    if (iter != m_pData->end())
+    CMapIDStr::iterator iter = m_pData.find(nId);
+    if (iter != m_pData.end())
     {
         std::string& key = iter->second;
         return atoi(key.c_str());
@@ -301,13 +296,13 @@ int CsvFile::GetInt(IROW nRow, ICOL nCol, int nDef/* = 0*/)
     return nDef;
 }
 
-double CsvFile::GetDouble(IROW nRow, ICOL nCol, double dDev/* = 0*/)
+double CsvFile::GetDouble(INUM nRow, IABC nCol, double dDev/* = 0*/)
 {
     assert((nRow > 0) && (nRow < CSVFILE_MAX_ROW));
     assert((nCol > 0) && (nCol < CSVFILE_MAX_COL));
     unsigned int nId = ((nRow << 16) | nCol);
-    CMapIDStr::iterator iter = m_pData->find(nId);
-    if (iter != m_pData->end())
+    CMapIDStr::iterator iter = m_pData.find(nId);
+    if (iter != m_pData.end())
     {
         std::string& key = iter->second;
         return atof(key.c_str());
